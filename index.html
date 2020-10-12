@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>內政部資料開放平台 - 電影</title>
+  <link rel="icon" href="image/Logo.png" sizes="57x57" type="image/png">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.css" />
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.js"></script>
+  <style>
+    #infopage {
+      display: none;
+      position: fixed;
+      left: 0%;
+      top: 0%;
+      height: 100vh;
+      width: 100vw;
+      background: #FFFFFF;
+      overflow: auto;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .infos {
+      margin: 2rem;
+      font-weight: bolder;
+      font-size: xx-large;
+    }
+  </style>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-173949837-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-173949837-1');
+  </script>
+</head>
+
+<body>
+  <h1 class="text-center m-5">藝文機構電影欣賞節目表</h1>
+
+  <table width="100%" id="dt" class="table table-striped hover compact">
+    <thead class="thead-dark text-center">
+      <tr>
+        <th>主題</th>
+        <th>日期時間</th>
+        <th>活動地點</th>
+        <th>主辦/活動單位</th>
+        <th>活動官網連結</th>
+        <th>介紹</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="infopage" onclick="toggle()">
+  </div>
+
+
+  <div class="reference">
+    <h6 style="text-align:center">
+      資料來源：<a href="https://data.gov.tw/dataset/6010" target="_blank">內政部資料開放平台 - 電影</a>
+    </h6>
+  </div>
+  <script>
+    let data;
+    var info = "";
+    $.getJSON("https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=8").done(data => {
+      var print = "";
+      var info = "";
+      for (let i = 0; i < data.length; i++) {
+        print += `
+        <tr>
+          <td class="text-center" style="vertical-align:middle;">${data[i].title}</td>
+          <td class="text-center" style="vertical-align:middle;">${data[i].showInfo[0].time}</td>
+          <td style="vertical-align:middle;">
+            <strong>${data[i].showInfo[0].locationName}</strong><br>
+            <span class="text-muted">${data[i].showInfo[0].location}</span>
+          </td>
+          <td class="text-center" style="vertical-align:middle;">
+            ${data[i].masterUnit[0]}<br>
+            ${data[i].showUnit}
+          </td>
+          <td class="text-center" style="vertical-align:middle;">
+            <a href="${data[i].sourceWebPromote}" target="_blank">${data[i].sourceWebName}</a>
+          </td>
+          <td><input type="button" value="點我查看" onclick="toggle(${i})"></td>
+        </tr>
+        `;
+
+
+        info += `
+        <div id="info${i}" style="display:none;">
+        <p class="infos">
+          <pre>${data[i].descriptionFilterHtml}</pre>
+        </p>
+        </div>
+        `
+      }
+
+      $("tbody").html(print);
+      $("body").append(info);
+
+      $(document).ready(function () {
+        $('#dt').DataTable();
+      });
+    })
+
+    function toggle(i) {
+      $(`#infopage`).fadeToggle(500);
+      $(`#infopage`).css("display", "flex");
+      let content = $(`#info${i}`).html();
+      $(`#infopage`).html(content);
+    }
+  </script>
+</body>
+
+</html>
